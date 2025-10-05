@@ -1,0 +1,113 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  role          UserRole @default(USER)
+  passwordHash  String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  servers       Server[]
+  commandLogs   CommandLog[]
+  activityLogs  ActivityLog[]
+  
+  @@map("users")
+}
+
+model Server {
+  id          String     @id @default(cuid())
+  name        String
+  hostname    String
+  port        Int        @default(22)
+  username    String
+  description String?
+  status      ServerStatus @default(OFFLINE)
+  lastChecked DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  
+  // Relations
+  addedBy     String
+  user        User       @relation(fields: [addedBy], references: [id])
+  commandLogs CommandLog[]
+  
+  // SSH Configuration (encrypted in production)
+  authType    AuthType   @default(PASSWORD)
+  privateKey  String?
+  password    String?
+  
+  @@map("servers")
+}
+
+model CommandLog {
+  id          String       @id @default(cuid())
+  command     String
+  output      String?
+  status      CommandStatus @default(PENDING)
+  startTime   DateTime     @default(now())
+  endTime     DateTime?
+  duration    Int? // in milliseconds
+  
+  // Relations
+  serverId    String
+  server      Server       @relation(fields: [serverId], references: [id])
+  executedBy  String
+  user        User         @relation(fields: [executedBy], references: [id])
+  
+  @@map("command_logs")
+}
+
+model ActivityLog {
+  id          String       @id @default(cuid())
+  action      String
+  details     String?
+  ipAddress   String?
+  userAgent   String?
+  timestamp   DateTime     @default(now())
+  
+  // Relations
+  userId      String
+  user        User         @relation(fields: [userId], references: [id])
+  
+  @@map("activity_logs")
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+enum ServerStatus {
+  ONLINE
+  OFFLINE
+  ERROR
+}
+
+enum AuthType {
+  PASSWORD
+  PRIVATE_KEY
+}
+
+enum CommandStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+  TIMEOUT
+}
