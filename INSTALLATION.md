@@ -11,6 +11,8 @@
 8. [Troubleshooting](#troubleshooting)
 9. [Maintenance](#maintenance)
 
+
+
 ---
 
 ## Prerequisites
@@ -40,8 +42,8 @@ brew install git                          # macOS
 
 ### 1. Clone the Repository
 ```bash
-git clone <your-repository-url>
-cd server-automation-platform
+git clone 
+cd server-automation
 ```
 
 ### 2. Install Dependencies
@@ -716,3 +718,5 @@ For issues and questions:
 5. Ensure all dependencies are properly installed
 
 The platform is now ready for both development and production use with comprehensive security, monitoring, and maintenance procedures in place.
+
+<<<All .md files are created by AI, for any issues plaese report>>>
